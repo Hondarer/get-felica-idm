@@ -55,30 +55,41 @@
             }
         }
 
+        static Task pollingTask;
+
         static CancellationTokenSource _cancellationTokenSource;
 
         static void StartPolling()
         {
             _cancellationTokenSource = new CancellationTokenSource();
 
-            Task.Run(() =>
-            {
-                while (_cancellationTokenSource.Token.IsCancellationRequested == false)
-                {
-                    using (FeliCa felica = new FeliCa())
-                    {
-                        ConnectedReader = felica.ConnectedReader;
-                        IDm = felica.GetIDm();
-                    }
+            pollingTask = Task.Run(() =>
+              {
+                  while (_cancellationTokenSource.Token.IsCancellationRequested == false)
+                  {
+                      using (FeliCa380 felica = new FeliCa380())
+                      {
+                          ConnectedReader = felica.ConnectedReader;
+                          byte[] idmByte = felica.GetIDm();
+                          if (idmByte == null)
+                          {
+                              IDm = null;
+                          }
+                          else
+                          {
+                              IDm = BitConverter.ToString(felica.GetIDm()).Replace("-", string.Empty);
+                          }
+                      }
 
-                    Thread.Sleep(250);
-                }
-            });
+                      Thread.Sleep(200);
+                  }
+              });
         }
 
         static void StopPolling()
         {
             _cancellationTokenSource.Cancel();
+            pollingTask.Wait();
         }
     }
 }

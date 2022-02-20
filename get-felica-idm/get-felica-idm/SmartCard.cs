@@ -37,7 +37,7 @@ namespace get_felica_idm
         {
             uint pcchReaders = 0;
 
-            // 全NFCリーダの文字列バッファのサイズを取得
+            // 全スマートカードリーダーの文字列バッファのサイズを取得
             uint ret = NativeMethods.SCardListReaders(cardContext.DangerousGetHandle(), null, null, ref pcchReaders);
             if (ret != NativeMethods.SCARD_S_SUCCESS)
             {
@@ -45,7 +45,7 @@ namespace get_felica_idm
                 return null;
             }
 
-            // 全NFCリーダの文字列を取得
+            // 全スマートカードリーダーの文字列を取得
             byte[] mszReaders = new byte[pcchReaders * 2]; // 1文字2byte
             ret = NativeMethods.SCardListReaders(cardContext.DangerousGetHandle(), null, mszReaders, ref pcchReaders);
             if (ret != NativeMethods.SCARD_S_SUCCESS)
@@ -54,7 +54,7 @@ namespace get_felica_idm
                 return null;
             }
 
-            // Felicaリーダーを特定(仮に複数台あったら最初の 1 台)
+            // スマートカードリーダーを特定(仮に複数台あったら最初の 1 台)
             string ReaderFullName = Encoding.Unicode.GetString(mszReaders).Split((char)0).Where(r => r.Contains(readerNamePart)).FirstOrDefault();
             if (string.IsNullOrEmpty(ReaderFullName))
             {
@@ -72,12 +72,19 @@ namespace get_felica_idm
             uint ret = NativeMethods.SCardConnect(cardContext.DangerousGetHandle(), GetReaderFullName(cardContext, readerNamePart), NativeMethods.SCARD_SHARE_SHARED, NativeMethods.SCARD_PROTOCOL_T1, ref hCard, ref activeProtocol);
             if (ret != NativeMethods.SCARD_S_SUCCESS)
             {
-                return new SafeSCardHandle(IntPtr.Zero, $"FeliCaに接続できません。code = {ret}");
+                return new SafeSCardHandle(IntPtr.Zero, $"スマートカードに接続できません。code = {ret}");
             }
 
             return new SafeSCardHandle(hCard);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cardHandle"></param>
+        /// <param name="requestData"></param>
+        /// <returns></returns>
+        /// <exception cref="SmartCardException">スマートカードへの送信に失敗した際に発生します。</exception>
         public static byte[] Transmit(SafeSCardHandle cardHandle, byte[] requestData)
         {
             byte[] recvBuffer = new byte[RECV_BUFFER_LENGTH];
@@ -86,7 +93,7 @@ namespace get_felica_idm
             uint ret = NativeMethods.SCardTransmit(cardHandle.DangerousGetHandle(), SCARD_PCI_T1, requestData, requestData.Length, new NativeMethods.SCARD_IO_REQUEST(), recvBuffer, ref pcbRecvLength);
             if (ret != NativeMethods.SCARD_S_SUCCESS)
             {
-                return null;
+                throw new SmartCardException($"スマートカードへの送信に失敗しました。ret = {ret}");
             }
 
             return recvBuffer.Take(pcbRecvLength).ToArray();
