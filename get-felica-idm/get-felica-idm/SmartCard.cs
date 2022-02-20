@@ -42,7 +42,6 @@ namespace get_felica_idm
             if (ret != NativeMethods.SCARD_S_SUCCESS)
             {
                 // 検出失敗
-                //throw new ApplicationException("NFCリーダを確認できません。");
                 return null;
             }
 
@@ -52,19 +51,16 @@ namespace get_felica_idm
             if (ret != NativeMethods.SCARD_S_SUCCESS)
             {
                 // 検出失敗
-                //throw new ApplicationException("NFCリーダの取得に失敗しました。");
                 return null;
             }
 
-            // Felicaリーダーを特定
+            // Felicaリーダーを特定(仮に複数台あったら最初の 1 台)
             string ReaderFullName = Encoding.Unicode.GetString(mszReaders).Split((char)0).Where(r => r.Contains(readerNamePart)).FirstOrDefault();
             if (string.IsNullOrEmpty(ReaderFullName))
             {
                 // 検出失敗
-                //throw new ApplicationException("FeliCaリーダの取得に失敗しました。");
                 return null;
             }
-            //Console.WriteLine("　FeliCaリーダを検出しました。 " + readerName);
 
             return ReaderFullName;
         }
@@ -78,7 +74,6 @@ namespace get_felica_idm
             {
                 return new SafeSCardHandle(IntPtr.Zero, $"FeliCaに接続できません。code = {ret}");
             }
-            //Console.WriteLine("　FeliCaに接続しました。");
 
             return new SafeSCardHandle(hCard);
         }
