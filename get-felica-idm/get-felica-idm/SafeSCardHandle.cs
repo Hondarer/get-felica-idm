@@ -6,6 +6,8 @@ namespace get_felica_idm
     {
         public string InvalidReason;
 
+        public static SafeSCardHandle Invalid { get; }=new SafeSCardHandle(IntPtr.Zero);
+
         internal SafeSCardHandle(IntPtr handle, string invalidReason = null) : base(true)
         {
             SetHandle(handle);

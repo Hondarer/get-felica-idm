@@ -11,7 +11,7 @@ namespace get_felica_idm
     {
         static void Main(string[] args)
         {
-            FelicaPoller felicaPoller = new FelicaPoller();
+            FelicaInterface felicaPoller = new FelicaInterface();
             felicaPoller.StartPolling();
 
             Console.ReadKey();
