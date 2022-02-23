@@ -16,7 +16,7 @@ namespace get_felica_idm
 
         protected override bool ReleaseHandle()
         {
-            uint ret = NativeMethods.SCardReleaseContext(handle);
+            uint ret = NativeMethods.SCardDisconnect(handle, NativeMethods.SCARD_LEAVE_CARD);
             if (ret != NativeMethods.SCARD_S_SUCCESS)
             {
                 return false;

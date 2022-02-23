@@ -70,14 +70,14 @@
                       using (FeliCa380 felica = new FeliCa380())
                       {
                           ConnectedReader = felica.ConnectedReader;
-                          byte[] idmByte = felica.GetIDm();
+                          byte[] idmByte = felica.IDm;
                           if (idmByte == null)
                           {
                               IDm = null;
                           }
                           else
                           {
-                              IDm = BitConverter.ToString(felica.GetIDm()).Replace("-", string.Empty);
+                              IDm = BitConverter.ToString(idmByte).Replace("-", string.Empty);
                           }
                       }
 

@@ -79,6 +79,37 @@ namespace get_felica_idm
         }
 
         /// <summary>
+        /// カードの存在にかかわらずカードリーダーに直接接続します。
+        /// </summary>
+        /// <param name="cardContext"></param>
+        /// <param name="readerNamePart"></param>
+        /// <returns></returns>
+        public static SafeSCardHandle ConnectDirect(SafeSCardContext cardContext, string readerNamePart)
+        {
+            IntPtr hCard = IntPtr.Zero;
+            IntPtr activeProtocol = IntPtr.Zero;
+
+            uint ret = NativeMethods.SCardConnect(cardContext.DangerousGetHandle(), GetReaderFullName(cardContext, readerNamePart), NativeMethods.SCARD_SHARE_DIRECT, 0, ref hCard, ref activeProtocol);
+            if (ret != NativeMethods.SCARD_S_SUCCESS)
+            {
+                if (ret == NativeMethods.SCARD_E_SHARING_VIOLATION)
+                {
+                    return new SafeSCardHandle(IntPtr.Zero, $"他のアプリケーションがカードを排他的に使用中です。code = {ret}");
+                }
+                else if (ret == NativeMethods.SCARD_W_REMOVED_CARD)
+                {
+                    return new SafeSCardHandle(IntPtr.Zero, $"カードリーダーへの直接接続に失敗しました。code = {ret}");
+                }
+                else
+                {
+                    return new SafeSCardHandle(IntPtr.Zero, $"不明なエラーが発生しました。code = {ret}");
+                }
+            }
+
+            return new SafeSCardHandle(hCard);
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="cardHandle"></param>
